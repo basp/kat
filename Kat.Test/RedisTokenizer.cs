@@ -3,9 +3,9 @@
     using System;
     using System.Text;
 
-    public class CRLFTokenizer : Tokenizer<byte,string>
+    public class RedisTokenizer : Tokenizer<byte,string>
     {
-        public CRLFTokenizer(IScanner<byte> scanner)
+        public RedisTokenizer(IScanner<byte> scanner)
             : base(scanner)
         {
         }

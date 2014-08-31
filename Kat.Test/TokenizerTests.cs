@@ -13,7 +13,7 @@
         public void ChunkTokenizing()
         {
             var s = new Scanner<byte>();
-            var t = new CRLFTokenizer(s);
+            var t = new RedisTokenizer(s);
 
             byte[] bytes;
             IList<string> tokens;
