@@ -36,7 +36,7 @@ A tokenizer that uses a Kat `IScanner<T>` usually operates in the following way:
 
 This is exactly how the included `Tokenizer<T,U>` operates. With one added convenience: it will call an `OnFail` callback before breaking the loop.
 
-Example
+Scanner Example
 =======
 Let's take a look at how we can use a scanner to implemented a filtering operation on a possible infinite stream of bytes. First we'll need a scanner.
 
@@ -112,7 +112,7 @@ Now the result we get back is still not empty because that `\n` is in there. We 
 
 	result = s.Scan(result.Rest, x => x != '\n');
 
-Now we will get back an empty result again because the scanner is trying to parse `ba` but it succeeded all the way to the end. Again, it remembered our `ba` so far and is waiting on that `\n` for confirmation that the next token is complete. 
+Finally we will get back an empty result again because the scanner is trying to parse `ba` but it succeeded all the way to the end. Again, it remembered our `ba` so far and is waiting on that `\n` for confirmation that the next token is complete. 
 
 Scan Pattern
 ============
@@ -123,9 +123,83 @@ By now a pattern is emerging from our operations:
 * We get a failed result, in this case we passed the scanner some input and a predicate that failed at the first item. In this case, either the input was horribly invalid or the tokenizer is in some weird state. You can reset and try again, log errors and throw exceptions.
 * Also we need to know what to look for next, this is usually implemented as a sort of state machine (often even using a simple `enum`) but you can be creative here.
 
+Tokenizer Example
+=================
+The `Tokenizer<T, U>` is an abstract class that we cannot use directly. We'll have to implement it. Fortunately, that's pretty easy:
 
+	using System;
 
+	public class NewlineTokenizer : Tokenizer<byte,string>
+	{
+		protected override Tuple<ScanResult<byte>, bool> Scan(
+            ArraySegment<byte> source)
+        {
+			throw new NotImplementedExeption();
+        }
 
+        protected override string Factory(ArraySegment<byte> source)
+        {
+			throw new NotImplementedExeption();
+        }
+	}
 
+So now we are left with implementing these two methods. Let's tackle `Scan` first because that's usually the more difficult one. This will need to return a `Tuple<ScanResult<byte>, bool>`. We can obtain a `ScanResult<byte>` by using a scanner (the `Tokenizer<byte,string>` class comes with it) and the `bool` will signal whether the token (if any) we produce should be skipped.
 
- 
+To properly implement this we need to know if we are looking for a the newline character or not. We can use a simple `enum` but you might need something more complex depending on the protocol you're trying to parse.
+
+Let's implement this simple protocol:
+
+	enum Mode 
+	{
+		Default,
+		LF
+	}
+
+	Mode mode = Mode.Default;
+
+	protected override Tuple<ScanResult<byte>, bool> Scan(
+        ArraySegment<byte> source)
+    {
+		ScanResult<byte, bool> result;
+		
+		switch(this.mode)
+		{
+			case Mode.LF:
+				result = this.scanner.Scan(source, x => x == '\n');
+				this.mode = Mode.Default;
+				return Tuple.Create(result, true);
+			default:
+				result = this.scanner.Scan(source, x => x != '\n');
+				return Tuple.Create(result, false);
+		} 
+    }
+	
+We basically have two modes, either reading stuff until we find a linefeed character or handling that single linefeed. If we find a linefeed we return `true` for the `skipToken` value and make sure this is not skipped. For all other tokens in between those linefeed characters we return the token and `false` so it isn't skipped.
+
+We also need to implement the `Factory` method. This creates our final token out of the raw primitives we scanned:
+
+	protected override string Factory(ArraySegment<byte> source)
+	{
+		this.mode = Mode.LF;
+		return Encoding.UTF.GetString(source.Array, source.Offset, source.Count);
+	}
+
+The factory method will be called once an actual token to be returned is found (and `skipToken` equals `false`) so we can conveniently switch modes here.
+
+When using a `Tokenizer<T, U>` you don't have to worry about storing bytes or remembering stuff. It will make sure you get the correct piece of input passed into your `Scan` implementation. How to handle the behavior and state of that tokenizer is mostly up to the implementation.
+
+This tokenizer can be used to tokenize fragmented byte streams using a newline as a separator:
+
+	var s = new Scanner<byte>();
+	var t = new NewlineTokenizer(s);
+	
+	var bs1 = Encoding.UTF8.GetString("foo\nbar");
+	var bs2 = Encoding.UTF8.GetString("\nquux\nzoz\n");
+
+	IEnumerable<string> tokens;
+	
+	tokens = t.Tokenize(new ArraySegment<byte>(bs1));
+	Assert.AreEqual(1, tokens.Count());
+
+	tokens = t.Tokenize(new ArraySegment<byte>(bs2));
+	Assert.AreEqual(3, tokens.Count());
