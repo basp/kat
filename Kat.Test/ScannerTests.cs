@@ -8,7 +8,7 @@
     public class ScannerTests
     {
         [TestMethod]
-        public void Sandbox()
+        public void BasicScanning()
         {
             var s = new Scanner<byte>();
             ScanResult<byte> r;
@@ -30,7 +30,7 @@
         }
 
         [TestMethod]
-        public void ScanFooCrLf()
+        public void SomewhatMoreAdvancedScanning()
         {
             var s = new Scanner<byte>();
             ScanResult<byte> r;

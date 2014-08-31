@@ -3,9 +3,9 @@
     using System;
     using System.Text;
 
-    public class TestTokenizer : Tokenizer<byte,string>
+    public class CRLF : Tokenizer<byte,string>
     {
-        public TestTokenizer(IScanner<byte> scanner)
+        public CRLFTokenizer(IScanner<byte> scanner)
             : base(scanner)
         {
         }

@@ -10,10 +10,10 @@
     public class TokenizerTests
     {
         [TestMethod]
-        public void Sandbox()
+        public void ChunkTokenizing()
         {
             var s = new Scanner<byte>();
-            var t = new TestTokenizer(s);
+            var t = new CRLFTokenizer(s);
 
             byte[] bytes;
             IList<string> tokens;
