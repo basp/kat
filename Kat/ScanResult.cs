@@ -35,13 +35,6 @@
             }
         }
 
-        public static ScanResult<T> Create(
-            ArraySegment<T> token,
-            ArraySegment<T> rest)
-        {
-            return new ScanResult<T>(token, rest, token.Count);
-        }
-
         public static ScanResult<T> Fail()
         {
             return new ScanResult<T>(
@@ -56,6 +49,17 @@
                 new ArraySegment<T>(),
                 new ArraySegment<T>(),
                 count);
+        }
+    }
+
+    public static class ScanResult
+    {
+        public static ScanResult<T> Create<T>(
+            ArraySegment<T> token,
+            ArraySegment<T> rest,
+            int count = 0)
+        {
+            return new ScanResult<T>(token, rest, count);
         }
     }
 }

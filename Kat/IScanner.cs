@@ -10,5 +10,7 @@
         ScanResult<T> Scan(
             ArraySegment<T> segment, 
             Func<T, bool> pred);
+
+        void Reset();
     }
 }

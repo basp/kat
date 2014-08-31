@@ -7,22 +7,28 @@
     public class Scanner<T> : IScanner<T>
     {
         T[] buffer;
-        int tip;
+        int index;
 
-        static int MaxBuffer = 512 * 1024 * 1024;
+        const int MiB = 1024 * 1024;
+        const int MaxBuffer = 8 * MiB;
 
         public Scanner(int initialBufferSize = 1024)
         {
             this.buffer = new T[initialBufferSize];
-            this.tip = 0;
+            this.index = 0;
         }
 
         public ArraySegment<T> Buffer
         {
             get
             {
-                return new ArraySegment<T>(this.buffer, 0, this.tip);
+                return new ArraySegment<T>(this.buffer, 0, this.index);
             }
+        }
+
+        public void Reset()
+        {
+            this.index = 0;
         }
 
         public ScanResult<T> Scan(
@@ -51,36 +57,46 @@
                 // on trucking.
                 this.Append(segment);
 
-                // Progress but we are not there yet but we can return 
-                // the number of  characters we processed.
+                // We are not there yet but we can return the number of 
+                // characters we progressed. Note that some more valid
+                // characters might be coming in on a next scan so we can
+                // not return the final token yet.
                 return ScanResult<T>.Empty(count);
             }
 
-            // Real progress at last! We found something that we can return.
-            // Now we need to wrap up our result.
-            var found = new ArraySegment<T>(
-                segment.Array,
-                segment.Offset,
-                count);
+            // We might end up here if we have stuff in our buffer that we need 
+            // to return first so check if that's the case.
+            if(count > 0)
+            {
+                // Real progress at last! We found something that we can return.
+                // Now we need to wrap up our result.
+                var found = new ArraySegment<T>(
+                    segment.Array,
+                    segment.Offset,
+                    count);
 
-            this.Append(found);
+                this.Append(found);
+            }
 
             var rest = new ArraySegment<T>(
                 segment.Array,
                 segment.Offset + count,
-                segment.Count - found.Count);
+                segment.Count - count);
 
-            var result = ScanResult<T>.Create(this.Buffer, rest);
+            var result = ScanResult.Create(
+                this.Buffer, 
+                rest, 
+                this.Buffer.Count);
             
-            this.tip = 0;
+            this.index = 0;
             return result;
         }
 
         private void Append(ArraySegment<T> segment)
         {
-            if (segment.Count > this.buffer.Length - this.tip)
+            if (segment.Count > this.buffer.Length - this.index)
             {
-                var required = segment.Count + this.tip;
+                var required = segment.Count + this.index;
                 var size = ((required / 1024) + 1) * 1024;
                 if(size > MaxBuffer)
                 {
@@ -94,10 +110,10 @@
                 segment.Array,
                 segment.Offset,
                 this.buffer,
-                tip,     
+                index,     
                 segment.Count);
 
-            this.tip += segment.Count;
+            this.index += segment.Count;
         }  
     }
 }
