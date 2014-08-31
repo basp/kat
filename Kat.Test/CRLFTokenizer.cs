@@ -3,7 +3,7 @@
     using System;
     using System.Text;
 
-    public class CRLF : Tokenizer<byte,string>
+    public class CRLFTokenizer : Tokenizer<byte,string>
     {
         public CRLFTokenizer(IScanner<byte> scanner)
             : base(scanner)
