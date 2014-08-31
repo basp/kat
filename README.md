@@ -125,7 +125,7 @@ By now a pattern is emerging from our operations:
 
 Tokenizer Example
 =================
-The `Tokenizer<T, U>` is an abstract class that we cannot use directly. We'll have to implement it. Fortunately, that's pretty easy:
+The `Tokenizer<T, U>` is an abstract class that we cannot use directly. We'll have to implement it but once we do it will abstract away a lot of the tedium from the scanning pattern. Fortunately, implementing this abstract class is pretty easy:
 
 	using System;
 
