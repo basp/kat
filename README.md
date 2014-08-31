@@ -145,7 +145,7 @@ The `Tokenizer<T, U>` is an abstract class that we cannot use directly. We'll ha
 
 So now we are left with implementing these two methods. Let's tackle `Scan` first because that's usually the more difficult one. This will need to return a `Tuple<ScanResult<byte>, bool>`. We can obtain a `ScanResult<byte>` by using a scanner (the `Tokenizer<byte,string>` class comes with it) and the `bool` will signal whether the token (if any) we produce should be skipped.
 
-To properly implement this we need to know if we are looking for a the newline character or not. We can use a simple `enum` but you might need something more complex depending on the protocol you're trying to parse.
+To properly implement our newline protocol we need to know if we are looking for a the newline character or not. We can use a simple `enum` but you might need something more complex depending on the protocol you're trying to parse.
 
 Let's implement this simple protocol:
 
