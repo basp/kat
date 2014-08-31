@@ -160,29 +160,32 @@ Let's implement this simple protocol:
 	protected override Tuple<ScanResult<byte>, bool> Scan(
         ArraySegment<byte> source)
     {
-		ScanResult<byte, bool> result;
-		
-		switch(this.mode)
-		{
-			case Mode.LF:
-				result = this.scanner.Scan(source, x => x == '\n');
-				this.mode = Mode.Default;
-				return Tuple.Create(result, true);
-			default:
-				result = this.scanner.Scan(source, x => x != '\n');
-				return Tuple.Create(result, false);
-		} 
+        ScanResult<byte> result;
+
+        switch (this.mode)
+        {
+            case Mode.LF:
+                result = this.scanner.Scan(source, x => x == '\n');
+                this.mode = Mode.Default;
+                return Tuple.Create(result, true);
+            default:
+                result = this.scanner.Scan(source, x => x != '\n');
+                return Tuple.Create(result, false);
+        }
     }
 	
 We basically have two modes, either reading stuff until we find a linefeed character or handling that single linefeed. If we find a linefeed we return `true` for the `skipToken` value and make sure this is not skipped. For all other tokens in between those linefeed characters we return the token and `false` so it isn't skipped.
 
 We also need to implement the `Factory` method. This creates our final token out of the raw primitives we scanned:
 
-	protected override string Factory(ArraySegment<byte> source)
-	{
-		this.mode = Mode.LF;
-		return Encoding.UTF.GetString(source.Array, source.Offset, source.Count);
-	}
+    protected override string Factory(ArraySegment<byte> source)
+    {
+        this.mode = Mode.LF;
+        return Encoding.UTF8.GetString(
+            source.Array,
+            source.Offset,
+            source.Count);
+    }
 
 The factory method will be called once an actual token to be returned is found (and `skipToken` equals `false`) so we can conveniently switch modes here.
 
@@ -191,15 +194,19 @@ When using a `Tokenizer<T, U>` you don't have to worry about storing bytes or re
 This tokenizer can be used to tokenize fragmented byte streams using a newline as a separator:
 
 	var s = new Scanner<byte>();
-	var t = new NewlineTokenizer(s);
-	
-	var bs1 = Encoding.UTF8.GetString("foo\nbar");
-	var bs2 = Encoding.UTF8.GetString("\nquux\nzoz\n");
+    var t = new NewlineTokenizer(s);
 
-	IEnumerable<string> tokens;
-	
-	tokens = t.Tokenize(new ArraySegment<byte>(bs1));
-	Assert.AreEqual(1, tokens.Count());
+    var bs1 = Encoding.UTF8.GetBytes("foo\nbar");
+    var bs2 = Encoding.UTF8.GetBytes("\nquux\nzoz\n");
 
-	tokens = t.Tokenize(new ArraySegment<byte>(bs2));
-	Assert.AreEqual(3, tokens.Count());
+    IList<string> tokens;
+
+    tokens = t.Tokenize(new ArraySegment<byte>(bs1)).ToList();
+    Assert.AreEqual(1, tokens.Count());
+    Assert.AreEqual("foo", tokens[0]);
+
+    tokens = t.Tokenize(new ArraySegment<byte>(bs2)).ToList();
+    Assert.AreEqual(3, tokens.Count());
+    Assert.AreEqual("bar", tokens[0]);
+    Assert.AreEqual("quux", tokens[1]);
+    Assert.AreEqual("zoz", tokens[2]);
