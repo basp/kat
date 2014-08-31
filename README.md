@@ -17,10 +17,11 @@ Tokenizer
 You can use a scanner directly but often it's more convenient to implemented the included `Tokenizer<T,U>` base class. This contains all the boiler plate code to read from a `IScanner<T>` and convert it to an `IEnumerable<U>`. It's still up to you to implement the actual _protocol_ and the `ArraySegment<T>` to `U` conversion. 
 
 A tokenizer that uses a Kat `IScanner<T>` usually operates in the following way:
+
 1. Perform a scan with the scanner
 2. If the result has failed we break or return early
-3. If we found a token and we don't have to skip it we use the tokenizer's factory function to wrap up the found token segment.
-4. If the result was not empty, we repeat from 1 using the rest of our result as input (there might still be more tokens we can fetch from the segment).
+3. If we found a token and we don't have to skip it we use the tokenizer's factory function to wrap up the found token segment
+4. If the result was not empty, we repeat from 1 using the rest of our result as input (there might still be more tokens we can fetch from the segment)
 
 This is exactly how the included `Tokenizer<T,U>` operates. With one added convenience: it will call an `OnFail` callback before breaking the loop.
 
