@@ -103,12 +103,12 @@ One way to check this is to use the `result.Rest` property which is an `ArraySeg
 
 	result = s.Scan(result.Rest, x => x == '\n');
 	
-This time we are feeding it `result.Rest` and revert the predicate and say we are only interested in the `\n` instead of everything else. Now the result we get back is still not empty:
+This time we are feeding it `result.Rest` and revert the predicate and say we are only interested in the `\n` instead of everything else. 
 
 	result.IsEmpty
 	=> false
 
-So we need to loop around again still using `result.Rest` as our input:
+Now the result we get back is still not empty because that `\n` is in there. We are not interested in that one, we want to know what is behind it. So we need to loop around again still using `result.Rest` as our input. Except, this time we __reverse our predicate__ again:
 
 	result = s.Scan(result.Rest, x => x != '\n');
 
@@ -116,7 +116,7 @@ Now we will get back an empty result again because the scanner is trying to pars
 
 Scan Pattern
 ============
-So by now a pattern is emerging from our operations:
+By now a pattern is emerging from our operations:
 
 * We get an empty result, in this case we got no token but data ran out. We'll just have to wait or obtain more data and feed that as new input into the scanner.
 * We get a non empty result, in this case we found something that didn't match our predicate so we where able to return something. We still might have more stuff to handle in `Rest` so either check for that or blindly pass in `Rest` to another scan and check the next result.
