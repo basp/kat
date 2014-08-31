@@ -64,12 +64,10 @@
                 return ScanResult<T>.Empty(count);
             }
 
-            // We might end up here if we have stuff in our buffer that we need 
-            // to return first so check if that's the case.
+            // Small optimalization to only append the current segment
+            // in case we actually found some valid stuff.
             if(count > 0)
             {
-                // Real progress at last! We found something that we can return.
-                // Now we need to wrap up our result.
                 var found = new ArraySegment<T>(
                     segment.Array,
                     segment.Offset,
