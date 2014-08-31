@@ -48,7 +48,7 @@ Now we need some bytes to scan:
 	var bs2 = Encoding.UTF8.GetBytes("\nba");
 	var bs3 = Encoding.UTF8.GetBytes("r\nquux\n");	
 
-That's three sets of bytes that make up `foo\nbar\nquux\n` which is a sequence of tokens that we need to break up into using the `\n` character as a separator. Maybe we are in kind of some REPL that allows commands to span multiple lines? Or maybe we are just reading from a socket as chunks are coming in. The important thing is that we really don't know.
+That's three sets of bytes that make up `foo\nbar\nquux\n` which is a sequence of tokens that we need to break up into using the `\n` character as a separator. Maybe we are in kind of some REPL that allows commands to span multiple lines? Or maybe we are just reading from a socket as chunks are coming in. The important thing is that we really don't know and those chunks might be coming in for (in theory) forever.
 
 When we start to read the initial command we wanna start reading everything until we encounter a `\n` character. That's easy enough:
 
@@ -97,7 +97,7 @@ This time we _finally_ get back our token:
 	Encoding.UTF8.GetString(s.Array, s.Offset, s.Count);
 	=> "foo"
 
-However, this time we cannot go around and feed the scanner a new set of bytes, it still has to deal with the `\n`. And who knows what else is behind that `\n`, there still might be some tokens left for us to process? 
+However, this time we cannot go around and feed the scanner a new set of bytes, it still has to deal with the `\n`. And who knows what else is hiding behind that `\n`? There still might be some tokens left for us to process. 
 
 One way to check this is to use the `result.Rest` property which is an `ArraySegment<T>` that points to the unprocessed range of items in the last `Scan` invocation. In this case we have to loop around before obtaining any new data and finish with our current request first:
 
