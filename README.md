@@ -76,7 +76,7 @@ This means it _did_ successfully accept the primitives. The reason we didn't get
 
 This presents us with a bit of a conundrum though because if the scanner doesn't know? How can we know? Or how do we even know how to proceed? Well fortunately, we can check the `ScanResult<T>` and see how to proceed.
 
-If it failed (the `HasFailed` property is `true`) then we know that it made absolutely no progress on our last `Scan` invocation. In other words, it failed at the very first byte of the request. This will also happen if you feed it an empty request. How to proceed is usually to `Reset` the scanner and try on the next bit of data. You might wanna also log it or throw an exception instead. 
+If it failed (the `HasFailed` property is `true`) then we know that it made absolutely __no progress__ on our last `Scan` invocation. In other words, it failed at the very first byte of the request. This will also happen if you feed it an empty request. How to proceed is usually to `Reset` the scanner and try on the next bit of data. You might wanna also log it or throw an exception instead. 
 
 `HasFailed` will always mean that _zero_ characters where scanned. The scanner assumes you always feed it something that at least will make some kind of progress, if we don't we fail. Usually the problem lies with a client sending erroneous input.
 
