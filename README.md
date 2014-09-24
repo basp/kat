@@ -166,7 +166,11 @@ Let's implement this simple protocol:
         {
             case Mode.LF:
                 result = this.scanner.Scan(source, x => x == '\n');
-                this.mode = Mode.Default;
+				// If we are `empty` we need to continue to look for that `\n`.
+                if (!result.IsEmpty)
+                {
+                    this.mode = Mode.Default;
+                }
                 return Tuple.Create(result, true);
             default:
                 result = this.scanner.Scan(source, x => x != '\n');
