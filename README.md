@@ -31,8 +31,8 @@ A tokenizer that uses a Kat `IScanner<T>` usually operates in the following way:
 
 1. Perform a scan with the scanner
 2. If the result has failed we break or return early
-3. If we found a token and we don't have to skip it we use the tokenizer's factory function to wrap up the found token segment
-4. If the result was not empty, we repeat from 1 using the rest of our result as input (there might still be more tokens we can fetch from the segment)
+3. If we found a token and we don't have to skip it we use the tokenizer's factory function to wrap up the found token segment. We need to be sure to pass any trailing tokens (not part of the current result) for continued processing.
+4. If the result was not empty, we repeat from 1 using the rest of our result as input (there might still be more tokens we can fetch from the segment, this might be some tokens we passed in #3 that where not part of the command)
 
 This is exactly how the included `Tokenizer<T,U>` operates. With one added convenience: it will call an `OnFail` callback before breaking the loop.
 

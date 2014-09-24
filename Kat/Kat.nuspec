@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>0.0.2</version>
+    <title>Kat Scanning Utilities</title>
+    <authors>Bas Pennings</authors>
+    <projectUrl>http://github.com/basp/kat</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This will help dealing with tokenizing fragmented streams of primitives.</description>
+    <releaseNotes>This is not ready for production.</releaseNotes>
+    <copyright>Copyright 2014</copyright>
+  </metadata>
+</package>
